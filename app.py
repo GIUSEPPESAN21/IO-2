@@ -162,13 +162,13 @@ with col2:
         default_coeffs = st.session_state.get('goals', [{} for _ in range(num_goals)])[i-1].get('coeffs', [0.0]*num_vars)
         
         for j in range(1, num_vars + 1):
-            coeff = cols[j-1].number_input(f"$x_{j}$", key=f"g{i}_c{j}", label_visibility="label", value=default_coeffs[j-1])
+            coeff = cols[j-1].number_input(f"$x_{j}$", key=f"g{i}_c{j}", value=default_coeffs[j-1])
             coeffs.append(coeff)
         
         st.write("=") # Todas las metas se convierten en igualdades
         
         default_rhs = st.session_state.get('goals', [{} for _ in range(num_goals)])[i-1].get('rhs', 0.0)
-        rhs = cols[num_vars + 1].number_input("Valor", key=f"g{i}_rhs", label_visibility="label", value=default_rhs)
+        rhs = cols[num_vars + 1].number_input("Valor", key=f"g{i}_rhs", value=default_rhs)
         goals.append({'coeffs': coeffs, 'rhs': rhs})
         st.markdown("---")
 
@@ -186,14 +186,14 @@ if num_constraints > 0:
             default_c_coeffs = st.session_state.get('constraints', [{} for _ in range(num_constraints)])[i-1].get('coeffs', [0.0]*num_vars)
             
             for j in range(1, num_vars + 1):
-                coeff = cols[j-1].number_input(f"$x_{j}$", key=f"c{i}_c{j}", label_visibility="label", value=default_c_coeffs[j-1])
+                coeff = cols[j-1].number_input(f"$x_{j}$", key=f"c{i}_c{j}", value=default_c_coeffs[j-1])
                 coeffs.append(coeff)
             
             default_c_type = st.session_state.get('constraints', [{} for _ in range(num_constraints)])[i-1].get('type', '<=')
             constraint_type = cols[num_vars].selectbox("Tipo", ["<=", ">=", "=="], key=f"c{i}_type", index=["<=", ">=", "=="].index(default_c_type))
 
             default_c_rhs = st.session_state.get('constraints', [{} for _ in range(num_constraints)])[i-1].get('rhs', 0.0)
-            rhs = cols[num_vars + 1].number_input("Valor", key=f"c{i}_rhs", label_visibility="label", value=default_c_rhs)
+            rhs = cols[num_vars + 1].number_input("Valor", key=f"c{i}_rhs", value=default_c_rhs)
             constraints.append({'coeffs': coeffs, 'type': constraint_type, 'rhs': rhs})
             st.markdown("---")
 else:
@@ -245,3 +245,4 @@ if st.button("🚀 Resolver Problema", use_container_width=True):
                 st.error(f"No se pudo encontrar una solución óptima. Estado: **{status}**")
         except Exception as e:
             st.error(f"Ocurrió un error al resolver el problema: {e}")
+
