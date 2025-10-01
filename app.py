@@ -140,10 +140,13 @@ with col1:
     st.markdown("Define los **pesos** para minimizar las desviaciones no deseadas. Un peso mayor significa mayor importancia. Deja en 0 los pesos de las desviaciones que no te importa minimizar.")
     
     obj_weights = []
+    weights_state = st.session_state.get('obj_weights', [])
     for i in range(1, num_goals + 1):
         cols = st.columns(2)
-        default_minus = st.session_state.get('obj_weights', [{} for _ in range(num_goals)])[i-1].get('minus', 0.0)
-        default_plus = st.session_state.get('obj_weights', [{} for _ in range(num_goals)])[i-1].get('plus', 0.0)
+        weight_dict = weights_state[i-1] if i - 1 < len(weights_state) else {}
+        
+        default_minus = weight_dict.get('minus', 0.0)
+        default_plus = weight_dict.get('plus', 0.0)
         
         weight_minus = cols[0].number_input(f"Peso para $d_{i}^-$ (faltante)", key=f"w_m_{i}", value=default_minus)
         weight_plus = cols[1].number_input(f"Peso para $d_{i}^+$ (exceso)", key=f"w_p_{i}", value=default_plus)
@@ -154,12 +157,14 @@ with col2:
     st.markdown("Define cada una de tus metas. El solucionador las convertirá a la forma `Expresión + d⁻ - d⁺ = Valor`.")
     
     goals = []
+    goals_state = st.session_state.get('goals', [])
     for i in range(1, num_goals + 1):
         st.markdown(f"**Meta {i}**")
         cols = st.columns(num_vars + 2)
         coeffs = []
         
-        default_coeffs = st.session_state.get('goals', [{} for _ in range(num_goals)])[i-1].get('coeffs', [0.0]*num_vars)
+        goal_dict = goals_state[i-1] if i - 1 < len(goals_state) else {}
+        default_coeffs = goal_dict.get('coeffs', [0.0]*num_vars)
         
         for j in range(1, num_vars + 1):
             coeff = cols[j-1].number_input(f"$x_{j}$", key=f"g{i}_c{j}", value=default_coeffs[j-1])
@@ -167,7 +172,7 @@ with col2:
         
         st.write("=") # Todas las metas se convierten en igualdades
         
-        default_rhs = st.session_state.get('goals', [{} for _ in range(num_goals)])[i-1].get('rhs', 0.0)
+        default_rhs = goal_dict.get('rhs', 0.0)
         rhs = cols[num_vars + 1].number_input("Valor", key=f"g{i}_rhs", value=default_rhs)
         goals.append({'coeffs': coeffs, 'rhs': rhs})
         st.markdown("---")
@@ -178,21 +183,23 @@ if num_constraints > 0:
         st.markdown("Estas son restricciones que **deben** cumplirse (no son flexibles).")
         
         constraints = []
+        constraints_state = st.session_state.get('constraints', [])
         for i in range(1, num_constraints + 1):
             st.markdown(f"**Restricción {i}**")
             cols = st.columns(num_vars + 2)
             coeffs = []
             
-            default_c_coeffs = st.session_state.get('constraints', [{} for _ in range(num_constraints)])[i-1].get('coeffs', [0.0]*num_vars)
+            constraint_dict = constraints_state[i-1] if i - 1 < len(constraints_state) else {}
+            default_c_coeffs = constraint_dict.get('coeffs', [0.0]*num_vars)
             
             for j in range(1, num_vars + 1):
                 coeff = cols[j-1].number_input(f"$x_{j}$", key=f"c{i}_c{j}", value=default_c_coeffs[j-1])
                 coeffs.append(coeff)
             
-            default_c_type = st.session_state.get('constraints', [{} for _ in range(num_constraints)])[i-1].get('type', '<=')
+            default_c_type = constraint_dict.get('type', '<=')
             constraint_type = cols[num_vars].selectbox("Tipo", ["<=", ">=", "=="], key=f"c{i}_type", index=["<=", ">=", "=="].index(default_c_type))
 
-            default_c_rhs = st.session_state.get('constraints', [{} for _ in range(num_constraints)])[i-1].get('rhs', 0.0)
+            default_c_rhs = constraint_dict.get('rhs', 0.0)
             rhs = cols[num_vars + 1].number_input("Valor", key=f"c{i}_rhs", value=default_c_rhs)
             constraints.append({'coeffs': coeffs, 'type': constraint_type, 'rhs': rhs})
             st.markdown("---")
@@ -245,4 +252,5 @@ if st.button("🚀 Resolver Problema", use_container_width=True):
                 st.error(f"No se pudo encontrar una solución óptima. Estado: **{status}**")
         except Exception as e:
             st.error(f"Ocurrió un error al resolver el problema: {e}")
+
 
